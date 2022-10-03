@@ -20,22 +20,33 @@ enum GameState {
 }
 
 class Game: ObservableObject {
+    
+    // MARK: - Published Properties
+    
     @Published var currentPlayer: Player = .player1
     @Published var gameState: GameState = .inProgress
     @Published var grid: [[Square]] = []
+    
+    // MARK: - Read-Only Properties
     
     private(set) var size: Int
     private(set) var cancellables: Set<AnyCancellable> = []
     private(set) var moves: Int = 0
     
+    // MARK: - Internal Properties
+    
     var northWest: Square { grid[0][0] }
     var southWest: Square { grid[size - 1][0] }
     var minMovesNeeded: Int { (size * 2) - 1 }
+    
+    // MARK: - Init
     
     init(size: Int = 4) {
         self.size = size
         buildGrid()
     }
+    
+    // MARK: - Internal Functions
     
     func newGame() {
         cancellables = []
@@ -45,67 +56,14 @@ class Game: ObservableObject {
         buildGrid()
     }
     
-    func isWinning(square: Square) -> Bool {
-        return has2v2WinningGrid(completedBy: square) || hasWinningRow(completedBy: square) || hasWinningColumn(completedBy: square) || hasWinningDiagonal(completedBy: square)
-    }
+    // MARK: - Private Methods
     
-    private func has2v2WinningGrid(completedBy square: Square) -> Bool {
-        if square.top?.player == square.player {
-            if square.left?.player == square.player {
-                return square.topLeft?.player == square.player
-            } else if square.right?.player == square.player {
-                return square.topRight?.player == square.player
-            }
-        } else if square.bottom?.player == square.player {
-            if square.left?.player == square.player {
-                return square.bottomLeft?.player == square.player
-            } else if square.right?.player == square.player {
-                return square.bottomRight?.player == square.player
-            }
-        }
-        
-        return false
-    }
-    
-    private func hasWinningRow(completedBy square: Square) -> Bool {
-        return grid[square.position.row].filter({ $0.player == square.player }).count == size
-    }
-    
-    private func hasWinningColumn(completedBy square: Square) -> Bool {
-        return grid.filter({ $0[square.position.col].player == square.player }).count == size
-    }
-    
-    private func hasWinningDiagonal(completedBy square: Square) -> Bool {
-        var current: Square?
-        if square.position.row == square.position.col { // left diagonal
-            current = northWest
-            while current != nil {
-                if current?.player != square.player {
-                    return false
-                }
-                
-                current = current?.bottomRight
-            }
-            
-            return true
-        } else if square.position.row == size - square.position.col - 1 { // right diagonal
-            current = southWest
-            while current != nil {
-                if current?.player != square.player {
-                    return false
-                }
-                
-                current = current?.topRight
-            }
-            
-            return true
-        } else {
-            return false
-        }
+    private func switchPlayer() {
+        currentPlayer = currentPlayer == .player1 ? .player2 : .player1
     }
     
     private func buildGrid() {
-        // Moves from left to right, top to bottom, assuming that all squares to the left and above the current position are already populated.
+        // Moves from left to right, top to bottom, connecting new Squares to previously set neighbors (to the left, and above)
         for row in 0 ..< size {
             for col in 0 ..< size {
                 let square = Square(position: (row: row, col: col), delegate: self)
@@ -143,10 +101,69 @@ class Game: ObservableObject {
         }
     }
     
-    fileprivate func switchPlayer() {
-        currentPlayer = currentPlayer == .player1 ? .player2 : .player1
+    // MARK: Win Logic
+    
+    private func isWinning(square: Square) -> Bool {
+        return has2v2WinningGrid(completedBy: square) || hasWinningRow(completedBy: square) || hasWinningColumn(completedBy: square) || hasWinningDiagonal(completedBy: square)
+    }
+    
+    private func has2v2WinningGrid(completedBy square: Square) -> Bool {
+        if square.top?.player == square.player {
+            if square.left?.player == square.player {
+                return square.topLeft?.player == square.player
+            } else if square.right?.player == square.player {
+                return square.topRight?.player == square.player
+            }
+        } else if square.bottom?.player == square.player {
+            if square.left?.player == square.player {
+                return square.bottomLeft?.player == square.player
+            } else if square.right?.player == square.player {
+                return square.bottomRight?.player == square.player
+            }
+        }
+        
+        return false
+    }
+    
+    private func hasWinningColumn(completedBy square: Square) -> Bool {
+        return grid.filter({ $0[square.position.col].player == square.player }).count == size
+    }
+    
+    private func hasWinningDiagonal(completedBy square: Square) -> Bool {
+        var current: Square?
+        if square.position.row == square.position.col { // left diagonal
+            current = northWest
+            while current != nil {
+                if current?.player != square.player {
+                    return false
+                }
+                
+                current = current?.bottomRight
+            }
+            
+            return true
+        } else if square.position.row == size - square.position.col - 1 { // right diagonal
+            current = southWest
+            while current != nil {
+                if current?.player != square.player {
+                    return false
+                }
+                
+                current = current?.topRight
+            }
+            
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    private func hasWinningRow(completedBy square: Square) -> Bool {
+        return grid[square.position.row].filter({ $0.player == square.player }).count == size
     }
 }
+
+// MARK: - SquareDelegate
 
 extension Game: SquareDelegate {
     func didTapSquare(at position: (row: Int, col: Int)) {
