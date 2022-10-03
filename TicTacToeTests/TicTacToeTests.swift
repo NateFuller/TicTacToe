@@ -37,13 +37,13 @@ final class TicTacToeTests: XCTestCase {
         let game = Game()
         
         let innerSquare = game.grid[1][1]
-        XCTAssertIdentical(innerSquare.upperLeft, game.grid[0][0])
+        XCTAssertIdentical(innerSquare.topLeft, game.grid[0][0])
         XCTAssertIdentical(game.grid[0][0].bottomRight, innerSquare)
         
-        XCTAssertIdentical(innerSquare.above, game.grid[0][1])
-        XCTAssertIdentical(game.grid[0][1].below, innerSquare)
+        XCTAssertIdentical(innerSquare.top, game.grid[0][1])
+        XCTAssertIdentical(game.grid[0][1].bottom, innerSquare)
         
-        XCTAssertIdentical(innerSquare.upperRight, game.grid[0][2])
+        XCTAssertIdentical(innerSquare.topRight, game.grid[0][2])
         XCTAssertIdentical(game.grid[0][2].bottomLeft, innerSquare)
         
         XCTAssertIdentical(innerSquare.left, game.grid[1][0])
@@ -53,13 +53,13 @@ final class TicTacToeTests: XCTestCase {
         XCTAssertIdentical(game.grid[1][2].left, innerSquare)
         
         XCTAssertIdentical(innerSquare.bottomLeft, game.grid[2][0])
-        XCTAssertIdentical(game.grid[2][0].upperRight, innerSquare)
+        XCTAssertIdentical(game.grid[2][0].topRight, innerSquare)
         
-        XCTAssertIdentical(innerSquare.below, game.grid[2][1])
-        XCTAssertIdentical(game.grid[2][1].above, innerSquare)
+        XCTAssertIdentical(innerSquare.bottom, game.grid[2][1])
+        XCTAssertIdentical(game.grid[2][1].top, innerSquare)
         
         XCTAssertIdentical(innerSquare.bottomRight, game.grid[2][2])
-        XCTAssertIdentical(game.grid[2][2].upperLeft, innerSquare)
+        XCTAssertIdentical(game.grid[2][2].topLeft, innerSquare)
     }
 
     func testPerformanceExample() throws {
