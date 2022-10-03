@@ -104,7 +104,15 @@ class Game: ObservableObject {
     // MARK: Win Logic
     
     private func isWinning(square: Square) -> Bool {
-        return has2v2WinningGrid(completedBy: square) || hasWinningRow(completedBy: square) || hasWinningColumn(completedBy: square) || hasWinningDiagonal(completedBy: square)
+        hasWinningCorners(completedBy: square) ||
+        has2v2WinningGrid(completedBy: square) ||
+        hasWinningRow(completedBy: square) ||
+        hasWinningColumn(completedBy: square) ||
+        hasWinningDiagonal(completedBy: square)
+    }
+    
+    private func hasWinningCorners(completedBy square: Square) -> Bool {
+        [grid[0][0], grid[0][size - 1], grid[size - 1][0], grid[size - 1][size - 1]].filter({ $0.player == square.player }).count == size
     }
     
     private func has2v2WinningGrid(completedBy square: Square) -> Bool {
@@ -126,7 +134,7 @@ class Game: ObservableObject {
     }
     
     private func hasWinningColumn(completedBy square: Square) -> Bool {
-        return grid.filter({ $0[square.position.col].player == square.player }).count == size
+        grid.filter({ $0[square.position.col].player == square.player }).count == size
     }
     
     private func hasWinningDiagonal(completedBy square: Square) -> Bool {
@@ -159,7 +167,7 @@ class Game: ObservableObject {
     }
     
     private func hasWinningRow(completedBy square: Square) -> Bool {
-        return grid[square.position.row].filter({ $0.player == square.player }).count == size
+        grid[square.position.row].filter({ $0.player == square.player }).count == size
     }
 }
 
